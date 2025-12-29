@@ -135,7 +135,7 @@ export async function getCroppedImgWithEffect(
 
     // Apply Frame if requested
     if (options.frameColor) {
-        const borderThickness = Math.max(5, Math.min(pixelCrop.width, pixelCrop.height) * 0.025); // 2.5% thickness, min 5px
+        const borderThickness = Math.max(5, Math.min(pixelCrop.width, pixelCrop.height) * 0.01); // 2.5% thickness, min 5px
         ctx.lineWidth = borderThickness;
         ctx.strokeStyle = options.frameColor;
 

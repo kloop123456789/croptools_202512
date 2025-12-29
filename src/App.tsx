@@ -143,15 +143,7 @@ function App() {
         }
     };
 
-    const colors = [
-        { name: 'Red', value: '#EF4444' },
-        { name: 'Blue', value: '#3B82F6' },
-        { name: 'Green', value: '#22C55E' },
-        { name: 'Yellow', value: '#EAB308' },
-        { name: 'Purple', value: '#A855F7' },
-        { name: 'White', value: '#FFFFFF' },
-        { name: 'Black', value: '#000000' },
-    ];
+
 
     return (
         <div className="min-h-screen bg-[conic-gradient(at_top_left,_var(--tw-gradient-stops))] from-slate-900 via-purple-900 to-slate-900 text-white p-8">
@@ -196,29 +188,27 @@ function App() {
                                     {/* Frame Color Selector */}
                                     <div className="space-y-3">
                                         <label className="text-sm text-slate-400 font-medium block">枠の色</label>
-                                        <div className="flex gap-3">
-                                            <button
-                                                onClick={() => setFrameColor(null)}
-                                                className={clsx(
-                                                    "w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all",
-                                                    frameColor === null ? "border-blue-500 bg-white/10" : "border-slate-600 bg-transparent hover:border-slate-500"
-                                                )}
-                                                title="なし"
-                                            >
-                                                <span className="text-xs text-slate-400">なし</span>
-                                            </button>
-                                            {colors.map(color => (
-                                                <button
-                                                    key={color.name}
-                                                    onClick={() => setFrameColor(color.value)}
-                                                    className={clsx(
-                                                        "w-8 h-8 rounded-full border-2 transition-all hover:scale-110",
-                                                        frameColor === color.value ? "border-blue-500 scale-110 shadow-lg shadow-blue-500/20" : "border-transparent"
-                                                    )}
-                                                    style={{ backgroundColor: color.value }}
-                                                    title={color.name}
+                                        <div className="flex items-center gap-3">
+                                            <div className="relative overflow-hidden w-10 h-10 rounded-full ring-2 ring-white/10 shadow-lg cursor-pointer">
+                                                <input
+                                                    type="color"
+                                                    value={frameColor || '#FFFFFF'}
+                                                    onChange={(e) => setFrameColor(e.target.value)}
+                                                    className="absolute inset-0 w-[150%] h-[150%] -top-1/4 -left-1/4 p-0 border-0 cursor-pointer"
+                                                    disabled={frameColor === null}
                                                 />
-                                            ))}
+                                            </div>
+                                            <button
+                                                onClick={() => setFrameColor(frameColor ? null : '#FFFFFF')}
+                                                className={clsx(
+                                                    "px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors",
+                                                    frameColor === null
+                                                        ? "bg-slate-700 text-slate-300 border-slate-600 hover:bg-slate-600"
+                                                        : "bg-blue-500/20 text-blue-200 border-blue-500/50 hover:bg-blue-500/30"
+                                                )}
+                                            >
+                                                {frameColor === null ? "枠なし" : "枠あり"}
+                                            </button>
                                         </div>
                                     </div>
 
