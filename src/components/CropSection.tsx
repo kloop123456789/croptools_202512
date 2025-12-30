@@ -8,6 +8,11 @@ interface CropSectionProps {
     aspectRatio: number;
     label: string;
     onCropComplete: (croppedAreaPixels: Area) => void;
+    filters?: {
+        brightness: number;
+        saturation: number;
+        contrast: number;
+    };
 }
 
 export const CropSection: React.FC<CropSectionProps> = ({
@@ -15,6 +20,7 @@ export const CropSection: React.FC<CropSectionProps> = ({
     aspectRatio,
     label,
     onCropComplete,
+    filters,
 }) => {
     const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
     const [zoom, setZoom] = useState(1);
@@ -75,6 +81,9 @@ export const CropSection: React.FC<CropSectionProps> = ({
                     onZoomChange={onZoomChange}
                     onCropComplete={handleCropComplete}
                     objectFit="contain"
+                    style={{
+                        mediaStyle: filters ? { filter: `brightness(${filters.brightness}%) saturate(${filters.saturation}%) contrast(${filters.contrast}%)` } : undefined
+                    }}
                 />
                 <div className="absolute inset-0 pointer-events-none ring-1 ring-inset ring-white/10 rounded-2xl" />
             </div>
@@ -100,7 +109,12 @@ export const CropSection: React.FC<CropSectionProps> = ({
                 <div className="mt-2 pt-4 border-t border-white/5">
                     <p className="text-xs font-semibold text-slate-400 mb-3 uppercase tracking-wider">プレビュー</p>
                     <div className="w-full flex justify-center bg-slate-900/50 p-4 rounded-2xl border border-white/5 shadow-inner relative group/preview">
-                        <img src={previewUrl} alt="Preview" className="max-h-96 object-contain rounded-lg shadow-lg" />
+                        <img
+                            src={previewUrl}
+                            alt="Preview"
+                            className="max-h-96 object-contain rounded-lg shadow-lg"
+                            style={filters ? { filter: `brightness(${filters.brightness}%) saturate(${filters.saturation}%) contrast(${filters.contrast}%)` } : undefined}
+                        />
                         {completedCrop && (
                             <div className="absolute bottom-2 right-2 px-2 py-1 bg-black/70 backdrop-blur-md rounded text-xs font-mono text-white/90 border border-white/10 opacity-0 group-hover/preview:opacity-100 transition-opacity">
                                 {completedCrop.width} x {completedCrop.height} px

@@ -326,18 +326,21 @@ function App() {
                                     aspectRatio={1}
                                     label="正方形 (1:1)"
                                     onCropComplete={(area) => setCropData(prev => ({ ...prev, square: area }))}
+                                    filters={{ brightness, saturation, contrast }}
                                 />
                                 <CropSection
                                     imageSrc={imageSrc}
                                     aspectRatio={16 / 9}
                                     label="横長 (16:9)"
                                     onCropComplete={(area) => setCropData(prev => ({ ...prev, landscape: area }))}
+                                    filters={{ brightness, saturation, contrast }}
                                 />
                                 <CropSection
                                     imageSrc={imageSrc}
                                     aspectRatio={9 / 16}
                                     label="縦長 (9:16)"
                                     onCropComplete={(area) => setCropData(prev => ({ ...prev, portrait: area }))}
+                                    filters={{ brightness, saturation, contrast }}
                                 />
                             </div>
 
