@@ -95,6 +95,12 @@ export async function getCroppedImgWithEffect(
         frameColor?: string;
         isCircular?: boolean;
         rotation?: number;
+        filters?: {
+            brightness: number;
+            saturation: number;
+            contrast: number;
+        };
+        frameThickness?: number; // percentage (0-100) or coefficient
     } = {}
 ): Promise<Blob | null> {
     const image = await createImage(imageSrc);
@@ -107,6 +113,13 @@ export async function getCroppedImgWithEffect(
 
     canvas.width = pixelCrop.width;
     canvas.height = pixelCrop.height;
+
+    // Apply Filters
+    if (options.filters) {
+        // ctx.filter must be set BEFORE drawing the image
+        // brightness(100%) saturate(100%) contrast(100%) is default
+        ctx.filter = `brightness(${options.filters.brightness}%) saturate(${options.filters.saturation}%) contrast(${options.filters.contrast}%)`;
+    }
 
     if (options.isCircular) {
         ctx.beginPath();
@@ -135,9 +148,14 @@ export async function getCroppedImgWithEffect(
 
     // Apply Frame if requested
     if (options.frameColor) {
-        const borderThickness = Math.max(5, Math.min(pixelCrop.width, pixelCrop.height) * 0.01); // 2.5% thickness, min 5px
+        // Default to 1% if not specified. options.frameThickness is expected to be a percentage value like 1, 2.5, etc.
+        const thicknessPercent = options.frameThickness !== undefined ? options.frameThickness : 1;
+        const borderThickness = Math.max(5, Math.min(pixelCrop.width, pixelCrop.height) * (thicknessPercent / 100));
+
         ctx.lineWidth = borderThickness;
         ctx.strokeStyle = options.frameColor;
+        // Reset filter for stroke so frame color is not affected by image filters (optional, but usually desired)
+        ctx.filter = 'none';
 
         if (options.isCircular) {
             ctx.beginPath();
@@ -151,9 +169,7 @@ export async function getCroppedImgWithEffect(
             );
             ctx.stroke();
         } else {
-            // For square rect, stroke is centered on the path.
-            // We want inner border usually, or centered.
-            // Let's do inset frame.
+            // Inset frame
             ctx.strokeRect(borderThickness / 2, borderThickness / 2, canvas.width - borderThickness, canvas.height - borderThickness);
         }
     }

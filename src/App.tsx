@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Scissors, Circle, Square } from 'lucide-react';
+import { Scissors, Circle, Square, Sliders, Sun, Palette, Zap, Layers } from 'lucide-react';
 import { ImageUploader } from './components/ImageUploader';
 import { CropSection } from './components/CropSection';
 import { getCroppedImgWithEffect } from './utils/cropUtils';
@@ -18,6 +18,10 @@ function App() {
     // New State for Features
     const [frameColor, setFrameColor] = useState<string | null>('#FFFFFF');
     const [isCircular, setIsCircular] = useState(true);
+    const [brightness, setBrightness] = useState(100);
+    const [saturation, setSaturation] = useState(100);
+    const [contrast, setContrast] = useState(100);
+    const [frameThickness, setFrameThickness] = useState(1); // Default 1%
 
     // Store crop data for each aspect ratio
     const [cropData, setCropData] = useState<{
@@ -56,7 +60,12 @@ function App() {
         setImageDimensions(null);
         setFrameColor('#FFFFFF');
         setIsCircular(true);
+        setBrightness(100);
+        setSaturation(100);
+        setContrast(100);
+        setFrameThickness(1);
     };
+
 
     const generateBlobs = async () => {
         if (!imageSrc) return [];
@@ -69,13 +78,20 @@ function App() {
         try {
             // 1:1 Square
             if (cropData.square) {
+                // Common filters
+                const filters = { brightness, saturation, contrast };
+
                 // Standard Square
-                const squareBlob = await getCroppedImgWithEffect(imageSrc, cropData.square);
+                const squareBlob = await getCroppedImgWithEffect(imageSrc, cropData.square, { filters });
                 if (squareBlob) blobs.push({ blob: squareBlob, name: `${baseName}_1x1.jpg` });
 
                 // Framed Square (if color selected)
                 if (frameColor) {
-                    const framedBlob = await getCroppedImgWithEffect(imageSrc, cropData.square, { frameColor });
+                    const framedBlob = await getCroppedImgWithEffect(imageSrc, cropData.square, {
+                        frameColor,
+                        filters,
+                        frameThickness
+                    });
                     if (framedBlob) blobs.push({ blob: framedBlob, name: `${baseName}_1x1_framed.jpg` });
                 }
 
@@ -84,7 +100,9 @@ function App() {
                     // Circle with optional frame
                     const circleBlob = await getCroppedImgWithEffect(imageSrc, cropData.square, {
                         isCircular: true,
-                        frameColor: frameColor || undefined
+                        frameColor: frameColor || undefined,
+                        filters,
+                        frameThickness
                     });
                     if (circleBlob) blobs.push({ blob: circleBlob, name: `${baseName}_1x1_circle.png` });
                 }
@@ -92,13 +110,13 @@ function App() {
 
             // 16:9 Landscape
             if (cropData.landscape) {
-                const landscapeBlob = await getCroppedImgWithEffect(imageSrc, cropData.landscape);
+                const landscapeBlob = await getCroppedImgWithEffect(imageSrc, cropData.landscape, { filters: { brightness, saturation, contrast } });
                 if (landscapeBlob) blobs.push({ blob: landscapeBlob, name: `${baseName}_16x9.jpg` });
             }
 
             // 9:16 Portrait
             if (cropData.portrait) {
-                const portraitBlob = await getCroppedImgWithEffect(imageSrc, cropData.portrait);
+                const portraitBlob = await getCroppedImgWithEffect(imageSrc, cropData.portrait, { filters: { brightness, saturation, contrast } });
                 if (portraitBlob) blobs.push({ blob: portraitBlob, name: `${baseName}_9x16.jpg` });
             }
         } catch (e) {
@@ -212,6 +230,24 @@ function App() {
                                         </div>
                                     </div>
 
+                                    {/* Frame Thickness */}
+                                    <div className="space-y-3 min-w-[150px]">
+                                        <label className="text-sm text-slate-400 font-medium flex items-center gap-2">
+                                            <Layers size={14} />
+                                            枠の太さ: {frameThickness}%
+                                        </label>
+                                        <input
+                                            type="range"
+                                            min="0.5"
+                                            max="5"
+                                            step="0.5"
+                                            value={frameThickness}
+                                            onChange={(e) => setFrameThickness(Number(e.target.value))}
+                                            disabled={frameColor === null}
+                                            className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500 disabled:opacity-50"
+                                        />
+                                    </div>
+
                                     {/* Circular Toggle */}
                                     <div className="space-y-3">
                                         <label className="text-sm text-slate-400 font-medium block">追加フォーマット</label>
@@ -228,6 +264,58 @@ function App() {
                                             <span>円形クロップを含める</span>
                                             <div className={clsx("w-3 h-3 rounded-full ml-1", isCircular ? "bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.8)]" : "bg-slate-600")} />
                                         </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Image Adjustments */}
+                            <div className="bg-slate-800/40 backdrop-blur-md p-6 rounded-2xl border border-white/5 space-y-4">
+                                <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                                    <Sliders size={20} className="text-purple-400" />
+                                    画像補正
+                                </h3>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                                    <div className="space-y-3">
+                                        <label className="text-sm text-slate-400 font-medium flex items-center justify-between">
+                                            <span className="flex items-center gap-2"><Sun size={14} /> 明るさ</span>
+                                            <span className="text-blue-300 font-mono">{brightness}%</span>
+                                        </label>
+                                        <input
+                                            type="range"
+                                            min="0"
+                                            max="200"
+                                            value={brightness}
+                                            onChange={(e) => setBrightness(Number(e.target.value))}
+                                            className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                                        />
+                                    </div>
+                                    <div className="space-y-3">
+                                        <label className="text-sm text-slate-400 font-medium flex items-center justify-between">
+                                            <span className="flex items-center gap-2"><Palette size={14} /> 彩度</span>
+                                            <span className="text-blue-300 font-mono">{saturation}%</span>
+                                        </label>
+                                        <input
+                                            type="range"
+                                            min="0"
+                                            max="200"
+                                            value={saturation}
+                                            onChange={(e) => setSaturation(Number(e.target.value))}
+                                            className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-purple-500"
+                                        />
+                                    </div>
+                                    <div className="space-y-3">
+                                        <label className="text-sm text-slate-400 font-medium flex items-center justify-between">
+                                            <span className="flex items-center gap-2"><Zap size={14} /> コントラスト</span>
+                                            <span className="text-blue-300 font-mono">{contrast}%</span>
+                                        </label>
+                                        <input
+                                            type="range"
+                                            min="0"
+                                            max="200"
+                                            value={contrast}
+                                            onChange={(e) => setContrast(Number(e.target.value))}
+                                            className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-yellow-500"
+                                        />
                                     </div>
                                 </div>
                             </div>
